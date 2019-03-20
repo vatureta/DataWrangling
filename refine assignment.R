@@ -1,3 +1,4 @@
+#Test
 #load packages: dplyr, tidyr, stringr
 if (!require(tidyr)) {
   install.packages("tidyr")
@@ -9,19 +10,16 @@ if (!require(dplyr)) {
   library(dplyr)
 }
 
+if (!require(stringr)) {
+  install.packages("stringr")
+  library(stringr)
+}
 #Load refine_original.csv into RStudio.
 refine_original <- read.csv("refine_original.csv")
-#change company to lowercase
-tolower(refine_original$company)
-#create a new column 'company_new' with the new lowercase values 
-refine_original$company_new = tolower(refine_original$company)
-#realized i didn't need the column, so deleted company_new
-refine_original$company_new = NULL
-#check the column names in refine_original
-names(refine_original)
+refine_clean <- read.csv("refine_original.csv")
 
 #using mutate Clean up company column change all to lowercase and transform values to be philips, akzo, van houten and unilever
-refine_original <- refine_original %>%
+refine_clean <- refine_clean %>%
   mutate(company = tolower(company),
          company = ifelse(str_sub(company, 1, 1) %in% c('p','f'),'phillips',
                            ifelse(str_sub(company, 1, 1) == 'a', 'akzo',
@@ -31,7 +29,7 @@ refine_original <- refine_original %>%
            )
 
 #using separate to split 'Product.code...number' into product_code and product_number
-refine_original <- refine_original %>%
+refine_clean <- refine_clean %>%
  separate(Product.code...number, c("product_code","product_number"), sep = "-")
    
   
@@ -41,16 +39,28 @@ product <- c('Smartphone', 'TV', 'Laptop', 'Tablet')
 df_products <- data.frame(product_code, product)
 
 #join the refine_original with df_product
-refine_original <- refine_original %>% 
+refine_clean <- refine_clean %>% 
   merge(df_products, by="product_code")
 
 #create new column with full address by using unite()
-refine_original <- unite(refine_original, 'full_add', address, city, country, sep = ",")
+refine_clean <- unite(refine_clean, 'full_add', address, city, country, sep = ",")
 
 #create new column with full address by using paste()
 #refine_original <- refine_original %>%
 #  mutate(Full_address = paste('address', 'city', 'country', sep = ","))
 
 
-#using unite to 
-unite(refine_original,"full_address", address, city, country, sep = ",")
+#using unite to create new column with full address
+unite(refine_clean,"full_address", address, city, country, sep = ",")
+
+#creating dummy binary variables for categorical variables 'company' and 'product'
+refine_clean <- refine_clean %>%
+  mutate(company_philips = ifelse(str_sub(company, 1,1)=='p',1,0),
+         company_akzo = ifelse(str_sub(company, 1,1) == 'a',1,0),
+         company_van_houten = ifelse(str_sub(company, 1,1) == 'v',1,0),
+         company_unilever = ifelse(str_sub(company, 1,1) == 'u', 1,0),
+         product_smartphone = ifelse(product_code =='p', 1,0),
+         product_tv = ifelse(product_code =='v',1,0),
+         product_laptop = ifelse(product_code =='x', 1,0),
+         product_tablet = ifelse(product_code == 'q', 1,0)
+         )
