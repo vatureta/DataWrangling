@@ -1,18 +1,10 @@
+#set working directory
+setwd("~/R/DataWranglingTracked/DataWrangling")
+
 #load packages: dplyr, tidyr, stringr
-if (!require(tidyr)) {
-  install.packages("tidyr")
-  library(tidyr)
-}
-
-if (!require(dplyr)) {
-  install.packages("dplyr")
-  library(dplyr)
-}
-
-if (!require(stringr)) {
-  install.packages("stringr")
-  library(stringr)
-}
+library(tidyr)
+library(dplyr)
+library(stringr)
 #Load refine_original.csv into RStudio.
 refine_original <- read.csv("refine_original.csv")
 refine_clean <- read.csv("refine_original.csv")
@@ -21,17 +13,17 @@ refine_clean <- read.csv("refine_original.csv")
 refine_clean <- refine_clean %>%
   mutate(company = tolower(company),
          company = ifelse(str_sub(company, 1, 1) %in% c('p','f'),'phillips',
-                           ifelse(str_sub(company, 1, 1) == 'a', 'akzo',
-                                  ifelse(str_sub(company, 1, 1) == 'v', 'van houten',
-                                         ifelse(str_sub(company, 1, 1) == 'u', 'unilever', 'other'
-                                                ))))
-           )
+                          ifelse(str_sub(company, 1, 1) == 'a', 'akzo',
+                                 ifelse(str_sub(company, 1, 1) == 'v', 'van houten',
+                                        ifelse(str_sub(company, 1, 1) == 'u', 'unilever', 'other'
+                                        ))))
+  )
 
 #using separate to split 'Product.code...number' into product_code and product_number
 refine_clean <- refine_clean %>%
- separate(Product.code...number, c("product_code","product_number"), sep = "-")
-   
-  
+  separate(Product.code...number, c("product_code","product_number"), sep = "-")
+
+
 #create a data frame for products
 product_code <- c('p','v','x','q')
 product <- c('Smartphone', 'TV', 'Laptop', 'Tablet')
@@ -62,4 +54,4 @@ refine_clean <- refine_clean %>%
          product_tv = ifelse(product_code =='v',1,0),
          product_laptop = ifelse(product_code =='x', 1,0),
          product_tablet = ifelse(product_code == 'q', 1,0)
-         )
+  )
